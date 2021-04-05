@@ -11,7 +11,7 @@ const constants       = require('./constants/index');
 const spintax         = require('mel-spintax');
 
 const {createFolders} = jsPackTools();
-const {suggestions}   = settings.smartReply;
+const {smartReply}    = settings;
 const spinner         = helpers.spinner();
 const progressBar     = helpers.progressBar();
 
@@ -216,7 +216,7 @@ let page              = undefined;
 		!isLogin
 		&& await getAndShowQR();
 		await injectScripts();
-		suggestions.length
+		smartReply.length
 		&& await setSmartReplay();
 	} catch (e) {
 		throw new Error(e);

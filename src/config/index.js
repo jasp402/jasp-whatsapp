@@ -3,9 +3,7 @@ module.exports = Object.freeze({
 		headless    : false,
 		isGroupReply: false
 	},
-	smartReply: {
-		suggestions: ["Buen día equipo!", "Dame un momento porfa.", "\uD83D\uDE0A Gracias!"],
-	},
+	smartReply: ["Buen día equipo!", "Dame un momento porfa.", "\uD83D\uDE0A Gracias!"],
 	botDataSet: [
 		{
 			"contains": [],
@@ -72,4 +70,5 @@ module.exports = Object.freeze({
 		}
 	],
 	blocked   : [],
+	scheduler  : []
 });
