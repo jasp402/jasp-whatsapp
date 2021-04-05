@@ -29,6 +29,7 @@ let page              = undefined;
 			spinner.start('getting ready with Google Chrome...');
 			createFolders(constants.BROWSER_DATA_DIR);
 			const opts = {
+				ignoreDefaultFlags:true,
 				chromeFlags: constants.BROWSER_ARGS,
 				userDataDir: constants.BROWSER_DATA_DIR,
 				logLevel   : 'info',
