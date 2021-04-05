@@ -9,15 +9,17 @@ const wiki           = require('wikijs').default;
 const {decryptMedia} = require('./lib/DECRYPT');
 const settings       = require('./config/index');
 const fs             = require('fs');
+
 const app            = express();
-const port           = 5001
+const port           = 5001;
+
 
 const {botDataSet} = settings;
 const {customDate, createFolders} = jsPackTools();
 
 const dataSet      = botDataSet;
 const brainExact   = sentence => dataSet.find(obj => obj.exact.find(ex => ex.toLowerCase() === sentence.toLowerCase()));
-const brainPartial = sentence => dataSet.find(obj => obj.contains.find(ex => sentence.toLowerCase().search(ex) > -1));
+const brainPartial = sentence => dataSet.find(obj => obj.contains.find(ex => sentence.toLowerCase().search(ex.toLowerCase()) > -1));
 
 app.use(function(req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
@@ -25,7 +27,7 @@ app.use(function(req, res, next) {
 	next();
 });
 app.use(logger('dev'));
-app.use(express.json());
+app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
@@ -52,7 +54,6 @@ app.post('/save-image', async (req, res) => {
 
 app.post('/bot', (req, res) => {
 	const {text} = req.body;
-	console.log(text);
 	let textLowerCase = text.toLowerCase();
 	
 	if(textLowerCase.search('wiki') === 0){
@@ -91,8 +92,8 @@ app.post('/bot', (req, res) => {
 		res.json([send]);
 	}else if(partial){
 		let send = {
-			text: exact.response,
-			files: exact.file,
+			text: partial.response,
+			files: partial.file,
 			type: 'message'
 		}
 		res.json([send]);

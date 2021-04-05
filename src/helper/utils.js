@@ -7,6 +7,9 @@ const http           = require("http");
 const util           = require("util");
 const ChromeLauncher = require("chrome-launcher");
 const fs             = require('fs');
+const mime           = require('mime');
+const path           = require("path");
+const constants      = require('../constants/index');
 
 const getRequestAsync = util.promisify((options, callback) => {
 	const request = http.get(options, (response) => {
@@ -83,10 +86,10 @@ class Utils {
 		return /HeadlessChrome\/(.*)/.exec(version.Browser)[1];
 	}
 	
-	getFileInBase64(filename) {
+	getFileInBase64(filename, response='') {
 		return new Promise((resolve, reject) => {
 			try {
-				filename       = path.join(process.cwd(), filename);
+				filename       =constants.ASSETS_DIR(filename);
 				// get the mimetype
 				const fileMime = mime.getType(filename);
 				var file       = fs.readFileSync(filename, {encoding: 'base64'});
@@ -95,6 +98,15 @@ class Utils {
 				reject(error);
 			}
 		});
+	}
+	
+	saveFileFromBase64(base64Data, name, type){
+		let extension = mime.getExtension(type)
+		try {
+			fs.writeFileSync(path.join(process.cwd(), name + "." + extension), base64Data, 'base64')
+		} catch (error) {
+			console.error("Unable to write downloaded file to disk")
+		}
 	}
 	
 	isChromium() {

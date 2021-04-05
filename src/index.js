@@ -4,10 +4,11 @@ const qrcode          = require('qrcode-terminal');
 const jsPackTools     = require('js-packtools');
 const request         = require('request');
 const util            = require('util');
+const fs              = require('fs');
 const helpers         = require('./helper/utils');
 const settings        = require('./config/index');
 const constants       = require('./constants/index');
-const fs = require('fs');
+const spintax         = require('mel-spintax');
 
 const {createFolders} = jsPackTools();
 const {suggestions}   = settings.smartReply;
@@ -17,8 +18,6 @@ const progressBar     = helpers.progressBar();
 let isChrome          = undefined;
 let isLogin           = undefined;
 let page              = undefined;
-
-
 
 (async () => {
 	const checkBrowser     = async () => {
@@ -149,6 +148,12 @@ let page              = undefined;
 	}
 	const injectScripts    = async () => {
 		spinner.start('Inject scripts...');
+		// Expose Function
+		await page.exposeFunction("log", (message) => console.log(message));
+		await page.exposeFunction("resolveSpintax", spintax.unspin);
+		await page.exposeFunction("getFile", helpers.getFileInBase64);
+		await page.exposeFunction("saveFile", helpers.saveFileFromBase64);
+		
 		let modal =  fs.readFileSync(`${process.cwd()}\\src\\helper\\modal.html`, 'utf8')
 		await page.evaluate(content => {
 			const pageEl   = document.querySelector('#app');
@@ -157,8 +162,11 @@ let page              = undefined;
 			pageEl.appendChild(node);
 		},modal);
 		await page.evaluate(`let intents =${JSON.stringify(settings)}`);
+		
+		// Expose CSS
 		await page.addStyleTag({path: constants.PATH_STYLES});
 		// await page.addStyleTag({path: constants.PATH_STYLES_DARK});
+		
 		await page.waitForSelector('[data-icon=laptop]', {timeout: 30000})
 			.then(async () => {
 				await page.addScriptTag({path: require.resolve(constants.PATH_WAPI)});

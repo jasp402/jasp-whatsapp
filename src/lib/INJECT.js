@@ -78,32 +78,24 @@ WAPI.waitNewMessages(false, async (data) => {
 					//replying to the user based on response
 					if (response && response.length > 0) {
 						response.forEach(async itemResponse => {
-							
-							window.log(itemResponse.files);
-							
 							// sending files if there is any
 							if (itemResponse.files !== undefined) {
-								let file = await resolveSpintax(itemResponse.files);
-								window.log('file', file);
-								
-								window.getFile(file).then((base64Data) => {
-									WAPI.sendImage(base64Data, message.chatId._serialized, itemResponse.files);
+								window.getFile(itemResponse.files).then((base64Data) => {
+									WAPI.sendImage(base64Data, message.chatId._serialized, itemResponse.files, itemResponse.text);
 								}).catch((error) => {
 									window.log("Error in sending file\n" + error);
 								})
-							}
-							
-							let response = resolveSpintax(itemResponse.text);
-							response.then(text => {
-								text = text.fillVariables({
-									name       : message.sender.pushname,
-									phoneNumber: message.sender.id.user,
-									greetings  : greetings()
+							}else{
+								let response = resolveSpintax(itemResponse.text);
+								response.then(text => {
+									text = text.fillVariables({
+										name       : message.sender.pushname,
+										phoneNumber: message.sender.id.user,
+										greetings  : greetings()
+									});
+									WAPI.sendMessage2(message.from._serialized, text);
 								});
-								WAPI.sendMessage2(message.from._serialized, text);
-							});
-							
-							
+							}
 						});
 					}
 				})

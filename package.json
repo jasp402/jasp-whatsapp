@@ -1,10 +1,9 @@
 {
   "name": "jasp-whatsapp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "💬 A WhatsApp with many functionalities taken from many parts.",
   "main": "src/index.js",
-  "scripts":
-  {
+  "scripts": {
     "start": "concurrently \"nodemon src/server.js\" \"node src/index.js\"",
     "pack": "pkg ."
   },
@@ -44,6 +43,8 @@
     "express": "^4.17.1",
     "futoin-hkdf": "^1.3.3",
     "js-packtools": "^2.3.18",
+    "mel-spintax": "^1.0.4",
+    "mime": "^2.5.2",
     "mime-types": "^2.1.30",
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.1",

@@ -29,6 +29,7 @@ module.exports = Object.freeze({
 		"--num-raster-threads=1",
 	],
 	BROWSER_DATA_DIR  : path.join(`${process.cwd()}\\src\\bin`, "chromium-data"),
+	ASSETS_DIR        : fileName => path.join(process.cwd(),'src', 'assets', fileName),
 	BROWSER_PATH_DIR  : `${process.cwd()}\\src\\bin`,
 	SETTINGS_FILE     : 'settings.json',
 	PATH_WAPI         : `${process.cwd()}\\src\\lib\\WAPI.js`,
