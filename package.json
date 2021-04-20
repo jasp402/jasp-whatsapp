@@ -1,6 +1,6 @@
 {
   "name": "jasp-whatsapp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "💬 A WhatsApp with many functionalities taken from many parts.",
   "main": "src/index.js",
   "scripts": {
