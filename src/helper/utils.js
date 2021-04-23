@@ -9,7 +9,8 @@ const ChromeLauncher = require("chrome-launcher");
 const fs             = require('fs');
 const mime           = require('mime');
 const path           = require("path");
-const constants      = require('../constants/index');
+const constants      = require('../utils/constants');
+const { execSync } = require("child_process");
 
 const getRequestAsync = util.promisify((options, callback) => {
 	const request = http.get(options, (response) => {
@@ -89,7 +90,7 @@ class Utils {
 	getFileInBase64(filename, response='') {
 		return new Promise((resolve, reject) => {
 			try {
-				filename       =constants.ASSETS_DIR(filename);
+				filename = filename.trim();
 				// get the mimetype
 				const fileMime = mime.getType(filename);
 				var file       = fs.readFileSync(filename, {encoding: 'base64'});
@@ -125,6 +126,13 @@ class Utils {
 		} catch (e) {
 			return false;
 		}
+	}
+	
+	biblicalPicture(){
+		//Todo - se debe internarlizar el proyecto como plugis (aun no se como hacer eso)
+		let result = execSync("node C:\\Users\\Jasp402\\WebstormProjects\\1.-proyectos_jasp402\\Daily-biblical-image-generator\\app.js").toString();
+		console.log(result);
+		return result;
 	}
 }
 

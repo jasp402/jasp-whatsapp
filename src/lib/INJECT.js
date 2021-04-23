@@ -1,5 +1,5 @@
 let settings = intents;
-const {smartReply, scheduler} = settings;
+const {smartReply, scheduler, groupAllowReply, groupReply} = settings;
 
 
 const icons = {
@@ -31,8 +31,26 @@ function intervalScheduler(interV){
 			scheduler.forEach(alarm => {
 				let [hour, min] = alarm.timer.split(':');
 				if(date.getHours() === Number(hour) && date.getMinutes() === Number(min)){
+					// Get Biblical Picture once
+					 let result = (alarm.script === 'getBiblicalPicture') ? window.getBiblicalPicture() : null;
+					
 					alarm.sender.forEach(user => {
-						WAPI.sendMessage2(`${user}@c.us`, alarm.response);
+						let number = user.indexOf('-') > -1 ? `${user}@g.us` : `${user}@c.us`;
+						WAPI.sendMessage2(number, alarm.response);
+						
+						//acciones especiales
+						if(alarm.script === 'getBiblicalPicture'){
+
+							result.then(res=>{
+								console.log(res);
+								window.getFile(res).then((base64Data) => {
+									WAPI.sendImage(base64Data, number, res);
+								}).catch((error) => {
+									window.log("Error in sending file\n" + error);
+								})
+							})
+						}
+						
 					});
 				}
 			});
@@ -73,15 +91,30 @@ WAPI.waitNewMessages(false, async (data) => {
 		body.user     = message.chatId._serialized;
 		body.caption  = message.caption;
 		body.original = message;
-
-		if (message.type === "chat") {
-			//message.isGroupMsg to check if this is a group
-			if (message.isGroupMsg === true && settings.appConfig.isGroupReply === false) {
-				console.log("Message received in group and group reply is off. so will not take any actions.");
+		
+		
+		//Reacciona ante stickers en grupos
+		if(message.type === 'sticker' && message.isGroupMsg === true){
+			if (groupAllowReply.includes(body.user)) {
+				let bot = groupReply[`${body.user}`].find(bot => bot.RequestType === message.type);
+				WAPI.sendSeen(message.from._serialized);
+				WAPI.sendMessage2(message.from._serialized, bot.response);
 				return;
 			}
-			
-			console.log(`type: ${message.type}`);
+		}
+		
+		//Reacciona ante mensajes en grupos
+		if(message.type === 'chat' && message.isGroupMsg === true){
+			if (body.user in groupReply) {
+				window.log("Message received in group and group reply is off. so will not take any actions.");
+				window.log(message.from)
+				return;
+			}
+		}
+		
+		//Reacciona ante mensajes normales
+		if (message.type === "chat" && message.isGroupMsg === false) {
+			//message.isGroupMsg to check if this is a group
 			fetch('http://localhost:5001/bot', {
 				method : "POST",
 				body   : JSON.stringify(body),
@@ -123,6 +156,8 @@ WAPI.waitNewMessages(false, async (data) => {
 				});
 			
 		}
+		
+		//Reaciona ante imagenes y videos (chat y estados)
 		if(message.type === 'image' || message.type === 'video'){
 			console.log(`type: ${message.type}`);
 			fetch('http://localhost:5001/save-image', {
@@ -144,12 +179,14 @@ WAPI.waitNewMessages(false, async (data) => {
 			
 		}
 		
+		//Reacciona ante numeros en Lista Nega
 		if (settings.blocked.indexOf(message.chatId.user) >= 0) {
 			console.log("number is blocked by BOT. no reply");
 			return;
 		}
 	}
 });
+
 WAPI.addOptions = function () {
 	//Generate buttons
 	let buttons = smartReply.map((item) => elem('button', {'class': 'reply-options'}, item));
@@ -170,8 +207,7 @@ WAPI.addOptions = function () {
 	}));
 };
 WAPI.modalSettings = function () {
-	console.log('modalSettings');
-	// Get the modal
+// Get the modal
 	var modal = document.getElementById("myModal");
 
 // Get the button that opens the modal

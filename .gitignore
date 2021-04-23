@@ -105,3 +105,4 @@ dist
 /.idea/
 /downloads/
 /src/bin/chromium-data/
+/src/bin/

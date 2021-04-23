@@ -1,14 +1,14 @@
-const chromeLauncher  = require('chrome-launcher');
-const puppeteer       = require('puppeteer-core');
-const qrcode          = require('qrcode-terminal');
-const jsPackTools     = require('js-packtools');
-const request         = require('request');
-const util            = require('util');
-const fs              = require('fs');
-const helpers         = require('./helper/utils');
-const settings        = require('./config/index');
-const constants       = require('./constants/index');
-const spintax         = require('mel-spintax');
+const chromeLauncher = require('chrome-launcher');
+const puppeteer      = require('puppeteer-core');
+const qrcode         = require('qrcode-terminal');
+const jsPackTools    = require('js-packtools');
+const request        = require('request');
+const util           = require('util');
+const fs             = require('fs');
+const helpers        = require('./helper/utils');
+const settings       = require('./config/index');
+const spintax        = require('mel-spintax');
+const constants      = require('./utils/constants');
 
 const {createFolders} = jsPackTools();
 const {smartReply}    = settings;
@@ -27,13 +27,13 @@ let page              = undefined;
 		try {
 			spinner.info(`Google Chrome v${isChrome}`);
 			spinner.start('getting ready with Google Chrome...');
-			createFolders(constants.BROWSER_DATA_DIR);
+			createFolders(constants.PATH_BIN('chrome-data'));
 			const opts = {
-				ignoreDefaultFlags:true,
-				chromeFlags: constants.BROWSER_ARGS,
-				userDataDir: constants.BROWSER_DATA_DIR,
-				logLevel   : 'info',
-				output     : 'json'
+				ignoreDefaultFlags: true,
+				chromeFlags       : constants.BROWSER_ARGS,
+				userDataDir       : constants.PATH_BIN('chrome-data'),
+				logLevel          : 'info',
+				output            : 'json'
 			};
 			
 			//Launch chrome using chrome-launcher.
@@ -61,7 +61,7 @@ let page              = undefined;
 	const initWithChromium = async () => {
 		try {
 			spinner.start("Init Chromium...");
-			const browserFetcher = puppeteer.createBrowserFetcher({path: constants.BROWSER_PATH_DIR});
+			const browserFetcher = puppeteer.createBrowserFetcher({path: constants.PATH_BIN()});
 			
 			spinner.start('Checking Chromium version...');
 			const isChromium = await helpers.isChromium();
@@ -81,7 +81,7 @@ let page              = undefined;
 				executablePath : info.executablePath,
 				defaultViewport: null,
 				headless       : settings.appConfig.headless,
-				userDataDir    : constants.BROWSER_DATA_DIR,
+				userDataDir    : constants.PATH_BIN('chrome-data'),
 				devtools       : false,
 				args           : constants.BROWSER_ARGS
 			});
@@ -95,16 +95,12 @@ let page              = undefined;
 		if (page.length > 0) {
 			page = page[0];
 			page.setBypassCSP(true);
-			page.setUserAgent(constants.BROWSER_USER_AGENT);
+			// page.setUserAgent(constants.BROWSER_USER_AGENT);
 			await page.goto(constants.WHATSAPP_URL, {
 				waitUntil: 'networkidle0',
 				timeout  : 0
 			});
 			await page.waitForTimeout(1000);
-			
-			
-			//inject funtions
-			//page.exposeFunction("getFile", helpers.getFileInBase64);
 		}
 	}
 	const confirmLogin     = async () => {
@@ -148,10 +144,15 @@ let page              = undefined;
 		}
 	}
 	const injectScripts    = async () => {
+		//NUEVO PODER
+		
+		
 		spinner.start('Inject scripts...');
 		// Expose Function
+		
 		await page.exposeFunction("log", (message) => console.log(message));
 		await page.exposeFunction("resolveSpintax", spintax.unspin);
+		await page.exposeFunction("getBiblicalPicture", helpers.biblicalPicture);
 		await page.exposeFunction("getFile", helpers.getFileInBase64);
 		await page.exposeFunction("saveFile", helpers.saveFileFromBase64);
 		
@@ -165,13 +166,13 @@ let page              = undefined;
 		await page.evaluate(`let intents =${JSON.stringify(settings)}`);
 		
 		// Expose CSS
-		await page.addStyleTag({path: constants.PATH_STYLES});
-		// await page.addStyleTag({path: constants.PATH_STYLES_DARK});
+		await page.addStyleTag({path: constants.PATH_CONFIG('styles.css')});
+		// await page.addStyleTag({path: constants.PATH_CONFIG('styles-dark.css')});
 		
 		await page.waitForSelector('[data-icon=laptop]', {timeout: 30000})
 			.then(async () => {
-				await page.addScriptTag({path: require.resolve(constants.PATH_WAPI)});
-				await page.addScriptTag({path: require.resolve(constants.PATH_INJECT)});
+				await page.addScriptTag({path: require.resolve(constants.PATH_LIB('WAPI.js'))});
+				await page.addScriptTag({path: require.resolve(constants.PATH_LIB('INJECT.js'))});
 				spinner.succeed('Inject scripts...   Done!');
 			})
 			.catch(() => {
