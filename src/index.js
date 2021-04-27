@@ -5,10 +5,12 @@ const jsPackTools    = require('js-packtools');
 const request        = require('request');
 const util           = require('util');
 const fs             = require('fs');
-const helpers        = require('./helper/utils');
+const helpers        = require('./utils/utils');
 const settings       = require('./config/index');
 const spintax        = require('mel-spintax');
 const constants      = require('./utils/constants');
+const intl           = require('./locale/en-US').default;
+
 
 const {createFolders} = jsPackTools();
 const {smartReply}    = settings;
@@ -25,26 +27,19 @@ let page              = undefined;
 	}
 	const initWithChrome   = async () => {
 		try {
-			spinner.info(`Google Chrome v${isChrome}`);
-			spinner.start('getting ready with Google Chrome...');
+			spinner.info(intl['init.info.version']+isChrome);
+			
+			spinner.start(intl['init.ready.chrome']);
 			createFolders(constants.PATH_BIN('chrome-data'));
-			const opts = {
-				ignoreDefaultFlags: true,
-				chromeFlags       : constants.BROWSER_ARGS,
-				userDataDir       : constants.PATH_BIN('chrome-data'),
-				logLevel          : 'info',
-				output            : 'json'
-			};
 			
-			//Launch chrome using chrome-launcher.
-			spinner.start('Launch chrome using chrome-launcher...');
-			const chrome = await chromeLauncher.launch(opts);
-			opts.port    = chrome.port;
+			spinner.start(intl['init.launch.chrome']);
+			const {port} = await chromeLauncher.launch(constants.CHROME_OPTION);
 			
-			//Connect to it using puppeteer.connect().
-			spinner.start('Connect to it using puppeteer.connect()...');
-			const resp                   = await util.promisify(request)(`http://localhost:${opts.port}/json/version`);
-			const {webSocketDebuggerUrl} = JSON.parse(resp.body);
+			spinner.start(intl['init.promisify.chrome']);
+			const chromeResponse = await util.promisify(request)(constants.GET_CHROME_PORT(port));
+			const {webSocketDebuggerUrl} = JSON.parse(chromeResponse.body);
+			
+			spinner.start(intl['init.connect.puppeteer']);
 			const browser                = await puppeteer.connect({
 				browserWSEndpoint: webSocketDebuggerUrl,
 				defaultViewport  : null
