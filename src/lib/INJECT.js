@@ -114,7 +114,6 @@ WAPI.waitNewMessages(false, async (data) => {
 		
 		//Reacciona ante mensajes normales
 		if (message.type === "chat" && message.isGroupMsg === false) {
-			//message.isGroupMsg to check if this is a group
 			fetch('http://localhost:5001/bot', {
 				method : "POST",
 				body   : JSON.stringify(body),
@@ -130,23 +129,32 @@ WAPI.waitNewMessages(false, async (data) => {
 					//replying to the user based on response
 					if (response && response.length > 0) {
 						response.forEach(async itemResponse => {
+							const {files, text, spintax} = itemResponse;
+							
 							// sending files if there is any
-							if (itemResponse.files !== undefined) {
-								window.getFile(itemResponse.files).then((base64Data) => {
-									WAPI.sendImage(base64Data, message.chatId._serialized, itemResponse.files, itemResponse.text);
+							if (files !== undefined) {
+								window.getFile(files).then((base64Data) => {
+									WAPI.sendImage(base64Data, message.chatId._serialized, files, text);
 								}).catch((error) => {
 									window.log("Error in sending file\n" + error);
 								})
-							}else{
-								let response = resolveSpintax(itemResponse.text);
-								response.then(text => {
-									text = text.fillVariables({
-										name       : message.sender.pushname,
-										phoneNumber: message.sender.id.user,
-										greetings  : greetings()
+							}
+							else{
+								if(spintax){
+									let response = resolveSpintax(`{${itemResponse.text}}`);
+									response.then(text => {
+										// text = text.fillVariables({
+										// 	name       : message.sender.pushname,
+										// 	phoneNumber: message.sender.id.user,
+										// 	greetings  : greetings()
+										// });
+										WAPI.sendMessage2(message.from._serialized, text);
 									});
+								}
+								else{
 									WAPI.sendMessage2(message.from._serialized, text);
-								});
+								}
+								
 							}
 						});
 					}
@@ -159,7 +167,7 @@ WAPI.waitNewMessages(false, async (data) => {
 		
 		//Reaciona ante imagenes y videos (chat y estados)
 		if(message.type === 'image' || message.type === 'video'){
-			console.log(`type: ${message.type}`);
+			console.log(`type: ${message}`);
 			fetch('http://localhost:5001/save-image', {
 				method : "POST",
 				body   : JSON.stringify(body),
