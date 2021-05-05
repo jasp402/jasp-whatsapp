@@ -53,8 +53,14 @@ app.post('/save-image', async (req, res) => {
 });
 
 app.post('/bot', (req, res) => {
-	const {text} = req.body;
+	const {text, user, original} = req.body;
+	let userID      = original.sender.name ? original.sender.name.replace(/ /g, '_').toLowerCase() : user;
 	let textLowerCase = text.toLowerCase();
+	
+	const exact   = brainExact(text);
+	const partial = brainPartial(text);
+	
+	console.log(`${userID} ===: sentence : ===>${text}`);
 	
 	if(textLowerCase.search('wiki') === 0){
 		let content = textLowerCase.replace(/wiki\:|quien|que| es |cual|como|[?=]|[¿=]/g, '');
@@ -66,37 +72,37 @@ app.post('/bot', (req, res) => {
 			.page(content)
 			.then(page => page.summary())
 			.then(response => {
-				console.log('wiki response:', response);
+				// console.log('wiki response:', response);
 				if(!response) res.json([{text: '🧞‍♂ No lo se todo... pero intenta hacer mas simple la pregunta'}])
 				
 				let result =`🧞‍♂ Has preguntado por: *${content.trim()}* \n`;
 					result += "```"+response+"```";
-				res.json([{text:result, type: 'message'}])
+				res.json([{text:result, type: 'message', spintax:false}])
 			})
 			.catch(e =>{
-				res.json([{text: `🔮 Up's algo no anda bien... \n *${e}*`, type: 'message'}]);
+				res.json([{text: `🔮 Up's algo no anda bien... \n *${e}*`, type: 'message', spintax:false}]);
 			});
 	}
-	
-	const exact   = brainExact(text);
-	const partial = brainPartial(text);
-
-	console.log('===: sentence : ===>', text)
-	
-	if(exact){
+	else if(exact){
 		let send = {
 			text: exact.response,
 			files: exact.file,
-			type: 'message'
+			type: 'message',
+			spintax:true
 		}
 		res.json([send]);
-	}else if(partial){
+	}
+	else if(partial){
 		let send = {
 			text: partial.response,
 			files: partial.file,
-			type: 'message'
+			type: 'message',
+			spintax:true
 		}
 		res.json([send]);
+	}
+	else{
+		res.send('');
 	}
 	
 	
