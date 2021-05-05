@@ -9,7 +9,7 @@ const ChromeLauncher = require("chrome-launcher");
 const fs             = require('fs');
 const mime           = require('mime');
 const path           = require("path");
-const constants      = require('../utils/constants');
+const constants      = require('./constants');
 const { execSync } = require("child_process");
 
 const getRequestAsync = util.promisify((options, callback) => {
@@ -83,7 +83,9 @@ class Utils {
 			path: "/json/version",
 		}
 		const version = await getRequestAsync(options)
-		chrome.kill()
+		
+		chrome.kill();
+		
 		return /HeadlessChrome\/(.*)/.exec(version.Browser)[1];
 	}
 	

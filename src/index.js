@@ -15,20 +15,13 @@ const intl           = require('./locale/en-US').default;
 const {createFolders} = jsPackTools();
 const {smartReply}    = settings;
 const spinner         = helpers.spinner();
-const progressBar     = helpers.progressBar();
 
-let isChrome          = undefined;
-let isLogin           = undefined;
-let page              = undefined;
+let isLogin  = undefined;
+let page     = undefined;
 
 (async () => {
-	const checkBrowser     = async () => {
-		isChrome = await helpers.findChromeVersion();
-	}
 	const initWithChrome   = async () => {
 		try {
-			spinner.info(intl['init.info.version']+isChrome);
-			
 			spinner.start(intl['init.ready.chrome']);
 			createFolders(constants.PATH_BIN('chrome-data'));
 			
@@ -36,65 +29,31 @@ let page              = undefined;
 			const {port} = await chromeLauncher.launch(constants.CHROME_OPTION);
 			
 			spinner.start(intl['init.promisify.chrome']);
-			const chromeResponse = await util.promisify(request)(constants.GET_CHROME_PORT(port));
+			const chromeResponse         = await util.promisify(request)(constants.GET_CHROME_PORT(port));
 			const {webSocketDebuggerUrl} = JSON.parse(chromeResponse.body);
 			
 			spinner.start(intl['init.connect.puppeteer']);
-			const browser                = await puppeteer.connect({
+			const browser = await puppeteer.connect({
 				browserWSEndpoint: webSocketDebuggerUrl,
 				defaultViewport  : null
 			});
-			page                         = await browser.pages();
 			
-			//Done
-			spinner.succeed('initialized google chrome!');
-		} catch (e) {
-			spinner.fail('Up\'s something is wrong!');
-			throw new Error(e);
-		}
-	}
-	const initWithChromium = async () => {
-		try {
-			spinner.start("Init Chromium...");
-			const browserFetcher = puppeteer.createBrowserFetcher({path: constants.PATH_BIN()});
-			
-			spinner.start('Checking Chromium version...');
-			const isChromium = await helpers.isChromium();
-			const revNumber  = (isChromium) ? isChromium.version : await helpers.revChrome();
-			spinner.start(`Chromium Rev.${revNumber}`);
-			
-			progressBar.start(100, 0);
-			spinner.start('Downloading Chromium...');
-			const info = await browserFetcher.download(revNumber, (download, total) => {
-				progressBar.update((download * 100) / total);
-			});
-			progressBar.update(100);
-			spinner.succeed("Downloading Chromium ... done!");
-			
-			spinner.start("Launching Chromium...");
-			const browser = await puppeteer.launch({
-				executablePath : info.executablePath,
-				defaultViewport: null,
-				headless       : settings.appConfig.headless,
-				userDataDir    : constants.PATH_BIN('chrome-data'),
-				devtools       : false,
-				args           : constants.BROWSER_ARGS
-			});
-			spinner.succeed("Launching Chrome ... done!");
+			spinner.start(intl['init.set.page']);
 			page = await browser.pages();
-		} catch (e) {
+			
+			spinner.succeed(intl['init.success.done']);
+		}
+		catch (e) {
+			spinner.fail(intl['init.error.message']);
 			throw new Error(e);
 		}
 	}
+	
 	const gettingStarted   = async () => {
 		if (page.length > 0) {
 			page = page[0];
-			page.setBypassCSP(true);
-			// page.setUserAgent(constants.BROWSER_USER_AGENT);
-			await page.goto(constants.WHATSAPP_URL, {
-				waitUntil: 'networkidle0',
-				timeout  : 0
-			});
+			await page.setBypassCSP(true);
+			await page.goto(constants.WHATSAPP_URL, constants.GOTO_OPTION);
 			await page.waitForTimeout(1000);
 		}
 	}
@@ -151,13 +110,13 @@ let page              = undefined;
 		await page.exposeFunction("getFile", helpers.getFileInBase64);
 		await page.exposeFunction("saveFile", helpers.saveFileFromBase64);
 		
-		let modal =  fs.readFileSync(`${process.cwd()}\\src\\helper\\modal.html`, 'utf8')
+		let modal = fs.readFileSync(`${process.cwd()}\\src\\helper\\modal.html`, 'utf8')
 		await page.evaluate(content => {
 			const pageEl   = document.querySelector('#app');
 			let node       = document.createElement('div');
 			node.innerHTML = content;
 			pageEl.appendChild(node);
-		},modal);
+		}, modal);
 		await page.evaluate(`let intents =${JSON.stringify(settings)}`);
 		
 		// Expose CSS
@@ -203,10 +162,7 @@ let page              = undefined;
 	}
 	
 	try {
-		await checkBrowser();
-		!!isChrome
-			? await initWithChrome()
-			: await initWithChromium();
+		await initWithChrome();
 		await gettingStarted();
 		await confirmLogin();
 		!isLogin
@@ -214,7 +170,8 @@ let page              = undefined;
 		await injectScripts();
 		smartReply.length
 		&& await setSmartReplay();
-	} catch (e) {
+	}
+	catch (e) {
 		throw new Error(e);
 	}
 })();
