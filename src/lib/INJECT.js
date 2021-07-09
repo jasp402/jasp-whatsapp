@@ -95,8 +95,9 @@ WAPI.waitNewMessages(false, async (data) => {
 		
 		//Reacciona ante stickers en grupos
 		if(message.type === 'sticker' && message.isGroupMsg === true){
-			if (groupAllowReply.includes(body.user)) {
-				let bot = groupReply[`${body.user}`].find(bot => bot.RequestType === message.type);
+			let groupId = body.user.split('-')[1];
+			if (groupAllowReply.includes(groupId)) {
+				let bot = groupReply[groupId].find(bot => bot.requestType === message.type);
 				WAPI.sendSeen(message.from._serialized);
 				WAPI.sendMessage2(message.from._serialized, bot.response);
 				return;
