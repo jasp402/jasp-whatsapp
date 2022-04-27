@@ -15,14 +15,14 @@ const port           = 5001;
 
 
 const {botDataSet} = settings;
-const {customDate, createFolders} = jsPackTools();
+const {createFolders} = jsPackTools();
 
 const dataSet      = botDataSet;
 const brainExact   = sentence => dataSet.find(obj => obj.exact.find(ex => ex.toLowerCase() === sentence.toLowerCase()));
 const brainPartial = sentence => dataSet.find(obj => obj.contains.find(ex => sentence.toLowerCase().search(ex.toLowerCase()) > -1));
 
 app.use(function(req, res, next) {
-	res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 	next();
 });
@@ -31,18 +31,19 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.post('/save-image', async (req, res) => {
+app.post('/save-image/:source', async (req, res) => {
+	const {source}     = req.params;
 	const {original}   = req.body;
 	const message      = original;
 	const mediaData    = await decryptMedia(message);
 	const filename     = `${message.t}.${mime.extension(message.mimetype)}`;
 	const folderNumber = message.sender.id.split('@')[0];
 	const folderName   = ('name' in message.sender) ? message.sender.name.replace(/ /g, '_').toLowerCase() : 'unknown';
-	const folder       = `${folderName} ${folderNumber}`;
+	const folder       = `${folderName}-${folderNumber}`;
 	
-	createFolders(`./downloads/${folder}`);
+	createFolders(`./downloads/${source}/${folder}`);
 	
-	fs.writeFile(`./downloads/${folder}/${filename}`, mediaData, function(err) {
+	fs.writeFile(`./downloads/${source}/${folder}/${filename}`, mediaData, function(err) {
 		if (err) {
 			// res.send(err);
 			return console.log(err);

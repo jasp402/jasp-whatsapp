@@ -1,10 +1,20 @@
 module.exports = Object.freeze({
-	appConfig : {
+	appConfig      : {
 		headless    : false,
 		isGroupReply: false
 	},
-	smartReply: ["Buen día equipo!", "Dame un momento porfa.", "\uD83D\uDE0A Gracias!"],
-	botDataSet: [
+	smartReply     : ["Buen día equipo!", "Dame un momento porfa.", "\uD83D\uDE0A Gracias!"],
+	smartReplyV2:{
+		'👋': '👋 Hola!',
+		'🙋‍♂️': '🙋‍♂️ buenos dias!',
+		'🧑🏻‍💼': '🧑🏻‍💼 Buenos dias Equipo!',
+		'🥳': '🥳 Feliz cumpleaños! 🎉',
+		'🕐': '🕐 Dame un momento por favor',
+		'😊': '😊 Muchas Gracias!',
+		'🖼️': '{{getBiblicalPicture}}',
+		'📰': '{{getNoticies}}'
+	},
+	botDataSet     : [
 		{
 			"contains": [],
 			"exact"   : ["stikertest"],
@@ -69,6 +79,93 @@ module.exports = Object.freeze({
 			"response": "this is sample of variables:\nHey [#name] 👋, [#greetings]. \nThis is your phone number, [#phoneNumber]"
 		}
 	],
-	blocked   : [],
-	scheduler  : []
+	blocked        : [],
+	scheduler      : [
+		{
+			timer   : '7:35',
+			sender  : ['573008626251', '51915199237', '573172749748'],
+			response: `🌄 Muy Buenos días!`,
+		},
+		{
+			timer   : '12:30',
+			sender  : ['51915199237', '573008626251', '51959029726', '573172749748'],
+			response: `🍜 {Buen {provecho| apetito} 😋}`,
+		},
+		{
+			timer   : '15:00',
+			sender  : ['51959029726', '56948828296'],
+			response: `👋 Epale negrita! ¿Como estas? 😋`,
+		},
+		{
+			timer   : '21:00',
+			sender  : ['51915199237'],
+			response: `🥱😴 Es hora de dormir; descanza!`,
+		},
+		{
+			timer   : '9:30',
+			sender: ['584243560060', '51915199237', '51959029726', '56948828296', '573008626251', '573172749748', '584167162016', '56930750213'],
+			response: ``,
+			script  : 'getBiblicalPicture'
+		},
+		{
+			timer   : '9:10',
+			sender: ['51926466715', '584167162016', '584243061610', '56930750213'],
+			response: ``,
+			script  : 'getBiblicalPicture'
+		},
+	],
+	groupAllowReply: [
+		'1617735527@g.us',
+		'1620836330@g.us'
+	],
+	groupReply     : {
+		'1617735527@g.us': [
+			{
+				'requestType': 'sticker',
+				'contains'   : [],
+				'exact'      : [],
+				'response'   : '👆🏻 \n' +
+					'\n' +
+					'★━━━━━━━━━━━━━━━━━★\n' +
+					' ░▒▓ JS & NᴏᴅᴇJS ▓▒░\n' +
+					'★━━━━━━━━━━━━━━━━━★\n' +
+					'Por favor, lee las reglas 👇🏻\n' +
+					'\n' +
+					'⚠️ PROHIBIDO ⚠️\n' +
+					'\n' +
+					'🚫 Subir ACORTADORES.\n' +
+					'\n' +
+					'🚫 Hacer SPAM.\n' +
+					'\n' +
+					'🚫 Stickers (Sin excepciones)\n' +
+					'\n' +
+					'🚫 Publicidad de ventas.\n' +
+					'\n' +
+					'🚫 Pornográfia.\n' +
+					'\n' +
+					'🚫 Insultar a otro miembro (Prohibido el bulling).\n' +
+					'\n' +
+					'🚫 Prohibido cualquier material audiovisual que no este relacionado con los intereses del grupo.'
+			},
+			{
+				'requestType': 'chat',
+				'contains'   : [],
+				'exact'      : [],
+				'response'   : '👆🏻 \n'
+			}
+		],
+		'1620836330@g.us':[
+			{
+				'requestType': 'sticker',
+				'contains'   : [],
+				'exact'      : [],
+				'response'   : '🚫 Subir URL con ACORTADORES.\n' +
+					'🚫 Realizar SPAM o publicar Venta de cualquier tipo sin autorización de los Administradores.\n' +
+					'🚫 Prohibido el uso Stickers (Sin excepciones)\n' +
+					'🚫 Pornográfia.\n' +
+					'🚫 Insultar a otro miembro (y uso de malas palabras).\n' +
+					'🚫 Prohibido cualquier material audiovisual que no este relacionado con los intereses del grupo.'
+			},
+		]
+	}
 });

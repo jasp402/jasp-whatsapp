@@ -7,7 +7,6 @@ exports.CHROME_OPTION   = {
 		"--app=https://web.whatsapp.com",
 		"--disable-gpu",
 		"--renderer",
-		"--no-sandbox",
 		"--no-service-autorun",
 		"--no-experiments",
 		"--no-default-browser-check",

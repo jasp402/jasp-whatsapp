@@ -13,7 +13,7 @@ const intl           = require('./locale/en-US').default;
 
 
 const {createFolders} = jsPackTools();
-const {smartReply}    = settings;
+const {smartReplyV2}    = settings;
 const spinner         = helpers.spinner();
 
 let isLogin  = undefined;
@@ -48,19 +48,20 @@ let page     = undefined;
 			throw new Error(e);
 		}
 	}
-	
 	const gettingStarted   = async () => {
 		if (page.length > 0) {
 			page = page[0];
 			await page.setBypassCSP(true);
-			await page.goto(constants.WHATSAPP_URL, constants.GOTO_OPTION);
+			// await page.goto(constants.WHATSAPP_URL, constants.GOTO_OPTION);
 			await page.waitForTimeout(1000);
 		}
 	}
 	const confirmLogin     = async () => {
 		try {
 			spinner.start("Confirm Login...");
-			isLogin = await page.evaluate("localStorage['last-wid']");
+			await page.waitForTimeout(5000);
+			isLogin = await page.evaluate("localStorage['last-wid-md']");
+			console.log(isLogin);
 			spinner.succeed(`logged in Success! ${isLogin}`);
 		} catch (e) {
 			await page
@@ -74,10 +75,11 @@ let page     = undefined;
 	}
 	const getAndShowQR     = async () => {
 		let saveImageQR = undefined;
-		
+		let scanMe = "img[alt='Scan me!'], canvas";
 		try {
 			while (!isLogin) {
-				let getImageQR    = await page.evaluate(`document.querySelector("img[alt='Scan me!'], canvas").parentElement.getAttribute("data-ref")`);
+				await page.waitForTimeout(5000);
+				let getImageQR    = await page.evaluate(`document.querySelector("${scanMe}").parentElement.getAttribute("data-ref")`);
 				let buttonRefresh = await page.$$(`[data-testid='refresh-large']`) || [];
 				
 				if (saveImageQR !== getImageQR) {
@@ -168,7 +170,7 @@ let page     = undefined;
 		!isLogin
 		&& await getAndShowQR();
 		await injectScripts();
-		smartReply.length
+		Object.keys(smartReplyV2).length
 		&& await setSmartReplay();
 	}
 	catch (e) {
