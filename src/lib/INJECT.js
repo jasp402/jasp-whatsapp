@@ -90,15 +90,14 @@ WAPI.waitNewMessages(false, async (data) => {
 		body.user     = message.chatId._serialized;
 		body.caption  = message.caption;
 		body.original = message;
-		
-		
+		let groupId   = body.user;
+
 		//Reacciona ante stickers en grupos
 		if(message.type === 'sticker' && message.isGroupMsg === true){
-			let groupId = body.user.split('-')[1];
-			if (groupAllowReply.includes(groupId)) {
+			if(groupAllowReply.includes(groupId)) {
 				let bot = groupReply[groupId].find(bot => bot.requestType === message.type);
-				WAPI.sendSeen(message.from._serialized);
-				WAPI.sendMessage2(message.from._serialized, bot.response);
+				WAPI.sendSeen(body.user);
+				WAPI.sendMessage2(body.user, bot.response);
 				return;
 			}
 		}

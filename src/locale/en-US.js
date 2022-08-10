@@ -2,7 +2,7 @@
 
 exports.default = {
 	'init.info.version'     : `Google Chrome v`,
-	'init.ready.chrome'     : 'getting ready with Google Chrome...',
+	'init.ready.chrome'     : 'Getting ready with Google Chrome...',
 	'init.launch.chrome'    : 'Launch chrome using chrome-launcher...',
 	'init.connect.puppeteer': 'Connect to it using puppeteer.connect()...',
 	'init.promisify.chrome' : 'Get "WebSocket Debugger URL" chrome...',

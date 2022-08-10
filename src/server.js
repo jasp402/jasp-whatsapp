@@ -42,7 +42,6 @@ app.post('/save-image/:source', async (req, res) => {
 	const folder       = `${folderName}-${folderNumber}`;
 	
 	createFolders(`./downloads/${source}/${folder}`);
-	
 	fs.writeFile(`./downloads/${source}/${folder}/${filename}`, mediaData, function(err) {
 		if (err) {
 			// res.send(err);
@@ -108,6 +107,11 @@ app.post('/bot', (req, res) => {
 	
 	
 });
+
+app.get('/calendar', function(req, res) {
+	res.sendFile(path.join(__dirname, 'plugins/google/google.calendar.html'));
+});
+
 
 app.listen(port, () => {
 	console.log(`Example app listening at http://localhost:${port}`)
