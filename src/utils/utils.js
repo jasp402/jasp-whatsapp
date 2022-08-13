@@ -118,7 +118,7 @@ class Utils {
 		let Folders  = undefined;
 		
 		try {
-			files    = fs.readdirSync('../.bin');
+			files    = fs.readdirSync('../bin');
 			Folders  = files.filter(f => f !== 'chrome-data');
 			response = {
 				browser: 'chromium',
@@ -135,6 +135,17 @@ class Utils {
 		let result = execSync("node C:\\Users\\Jasp402\\WebstormProjects\\1.-proyectos_jasp402\\Daily-biblical-image-generator\\app.js").toString();
 		console.log(result);
 		return result;
+	}
+
+	async processWebhooks(webhooks, body={}) {
+		let response = await fetch(webhooks, {
+			method : 'POST',
+			body   : JSON.stringify(body),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+		return response.json();
 	}
 }
 

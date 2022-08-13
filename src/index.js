@@ -1,9 +1,10 @@
-const intl            = require('./locale/en-US').default;
-const constants       = require('./utils/constants');
 const chromeLauncher  = require('chrome-launcher');
-const qrcode          = require('qrcode-terminal');
 const puppeteer       = require('puppeteer-core');
+const constants       = require('./utils/constants');
+const intl            = require('./locale/en-US').default;
 const settings        = require('./config/index');
+const qrcode          = require('qrcode-terminal');
+const smartShortcuts  = require('../plugins/smartShortcut/component');
 const helpers         = require('./utils/utils');
 const jsPackTools     = require('js-packtools');
 const spintax         = require('mel-spintax');
@@ -15,6 +16,9 @@ const {smartReplyV2}  = settings;
 const spinner         = helpers.spinner();
 let isLogin           = undefined;
 let page              = undefined;
+
+
+require('dotenv').config();
 
 (async () => {
     const initWithChrome = async () => {
@@ -49,7 +53,7 @@ let page              = undefined;
     const gettingStarted = async () => {
         if (page.length > 0) {
             page = page[0];
-            await page.setBypassCSP(true);
+            // await page.setBypassCSP(true);
             // await page.goto(constants.WHATSAPP_URL, constants.GOTO_OPTION);
             await page.waitForTimeout(1000);
         }
@@ -105,6 +109,7 @@ let page              = undefined;
         await page.exposeFunction("getBiblicalPicture", helpers.biblicalPicture);
         await page.exposeFunction("getFile", helpers.getFileInBase64);
         await page.exposeFunction("saveFile", helpers.saveFileFromBase64);
+        await page.exposeFunction("processWebhooks", helpers.processWebhooks);
 
         let modal = fs.readFileSync(`${process.cwd()}\\src\\helper\\modal.html`, 'utf8')
         await page.evaluate(content => {
@@ -113,7 +118,8 @@ let page              = undefined;
             node.innerHTML = content;
             pageEl.appendChild(node);
         }, modal);
-        await page.evaluate(`let intents =${JSON.stringify(settings)}`);
+        await page.evaluate(`let intents = ${JSON.stringify(settings)};`);
+        await page.evaluate(`let webhooks = ${JSON.stringify(process.env.WEBHOOKS)};`);
 
         // Expose CSS
         await page.addStyleTag({path: constants.PATH_CONFIG('styles.css')});
@@ -121,42 +127,16 @@ let page              = undefined;
 
         await page.waitForSelector('[data-icon=laptop]', {timeout: 30000})
             .then(async () => {
-                await page.addScriptTag({path: require.resolve(constants.PATH_LIB('WAPI.js'))});
-                await page.addScriptTag({path: require.resolve(constants.PATH_LIB('INJECT.js'))});
+                await page.addScriptTag({path: require.resolve(constants.PATH_PLUGINS)});
+                await page.addScriptTag({type: 'module', path: require.resolve(constants.PATH_LIB('WAPI.js'))});
+                await page.addScriptTag({type: 'module', path: require.resolve(constants.PATH_LIB('INJECT.js'))});
                 spinner.succeed('Inject scripts...   Done!');
             })
             .catch(() => {
                 spinner.fail('Not Inject scripts!');
             });
     }
-    const setSmartReplay = async () => {
-        spinner.start('Setting smart replay...');
-        await page.waitForSelector('#app');
-        await page.evaluate(`
-                var observer = new MutationObserver((mutations) => {
-                for (var mutation of mutations) {
-                    if (mutation.addedNodes.length && mutation.addedNodes[0].id === 'main') {
-                    console.log(mutation.addedNodes[0].id);
-                        console.log("Chat changed!");
-                        WAPI.addOptions();
-                        WAPI.modalSettings();
-                    }
-                }
-            });
-            observer.observe(document.querySelector('#app'), { attributes: false, childList: true, subtree: true });
-		`);
-        spinner.succeed('Setting smart replay...   Done!');
-        page.waitForSelector("#main", {timeout: 0}).then(async () => {
-            await page.exposeFunction("sendMessage", async message => {
-                return new Promise(async (resolve, reject) => {
-                    //send message to the currently open chat using power of puppeteer
-                    await page.type("#main p.selectable-text", message);
-                    await page.waitForTimeout(100);
-                    await page.click('span[data-testid="send"]');
-                });
-            });
-        });
-    }
+
     try {
         await initWithChrome();
         await gettingStarted();
@@ -164,8 +144,7 @@ let page              = undefined;
         !isLogin
         && await getAndShowQR();
         await injectScripts();
-        Object.keys(smartReplyV2).length
-        && await setSmartReplay();
+        await smartShortcuts.setSmartReplay(page, spinner);
     } catch (e) {
         throw new Error(e);
     }
