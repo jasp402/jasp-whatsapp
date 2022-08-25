@@ -2,6 +2,7 @@ let models = require('../../db/models');
 let {smart_reply_groups} = models;
 
 const _commands = async (cmd, metadata) => {
+    let result = {success:false, error:'', responseType:'send', message:''}
     if (cmd.indexOf('Create:replyGroup') > -1) {
         console.log('-- create new register --');
         cmd = cmd.replace('Create:replyGroup\n', '');
@@ -15,11 +16,50 @@ const _commands = async (cmd, metadata) => {
             files       : cmd[5] || null,
             groupIds    : metadata.user //Las respuesta solo funcionan segun el grupo donde se ha creado
         });
-        return true;
-    } else {
-        return false;
+        result.success      = true;
+        result.message      = '*🤖 ꜱᴇ ʜᴀ ᴄʀᴇᴀᴅᴏ ᴜɴ ʀᴇɢɪꜱᴛʀᴏ!*';
+        result.responseType = 'reply';
+        return result;
+    }
+    if (cmd.indexOf('List:replyGroup') > -1){
+        let dbData        = await smart_reply_groups.findAll({attributes: {exclude: ['createdAt', 'updatedAt']}});
+        let data          = dbData.map(item => item.dataValues);
+        result.success= true;
+        result.message= '*🤖ᴇꜱᴛᴏꜱ ꜱᴏɴ ʟᴏꜱ ʀᴇꜱᴜʟᴛᴀᴅᴏꜱ ᴏʙᴛᴇɴɪᴅᴏꜱ:* \n ```'+JSON.stringify(data,null,2)+'```';
+        result.responseType= 'reply';
+        return result;
+    }
+    if (!!cmd.match(/Search:replyGroup\(([0-9]).*[?)]/g)){
+        let extractId = cmd.match(/\(.*\)/g)[0];
+        extractId = extractId.replace(/\)|\(/g, '');
+        let dbData        = await smart_reply_groups.findAll({where:{id:extractId}, attributes: {exclude: ['createdAt', 'updatedAt']}});
+        let data          = dbData.map(item => item.dataValues);
+        result.success= true;
+        result.message= '*🤖ᴇꜱᴛᴏꜱ ꜱᴏɴ ʟᴏꜱ ʀᴇꜱᴜʟᴛᴀᴅᴏꜱ ᴏʙᴛᴇɴɪᴅᴏꜱ:* \n ```'+JSON.stringify(data,null,2)+'```';
+        result.responseType= 'reply';
+        return result;
+    }
+    if (!!cmd.match(/Delete:replyGroup\(([0-9]).*[?)]/g)){
+        let extractId = cmd.match(/\(.*\)/g)[0];
+        extractId = extractId.replace(/\)|\(/g, '');
+        let dbData        = await smart_reply_groups.findAll({where:{id:extractId}, attributes: {exclude: ['createdAt', 'updatedAt']}});
+        let data          = dbData.map(item => item.dataValues);
+        await smart_reply_groups.destroy({where:{id:extractId}});
+        result.success= true;
+        result.responseType= 'reply';
+        if(data.length > 0){
+            result.message= '*🤖 ᴇʟ ʀᴇɢɪꜱᴛʀᴏ ꜱᴇ ʜᴀ ᴇʟɪᴍɪɴᴀᴅᴏ ᴄᴏɴ ᴇxɪᴛᴏ!* \n ```'+JSON.stringify(data,null,2)+'```';
+        }else{
+            result.message= '*🤖 ɴᴏ ꜱᴇ ᴇɴᴄᴏɴᴛʀᴏ ᴇʟ ʀᴇꜱɢɪᴛʀᴏ Qᴜᴇ ɪɴᴛᴇɴᴛᴀ ᴇʟɪᴍɪɴᴀʀ!* \n Prueba listando todos los registros. Usa ```List:replyGroup```';
+        }
+        return result;
+    }
+    else {
+        result.success      = false;
+        return result;
     }
 }
+
 const _getUserName = metadata =>  metadata.original.sender.name ? metadata.original.sender.name.replace(/ /g, '_').toLowerCase() : metadata.user;
 
 const processMessage = (dataSet, text, metadata) => {
@@ -44,8 +84,9 @@ const processMsgGroup = async (req, res) => {
     console.log(`${username} = message =>${text}`);
 
     let registerCommands = await _commands(text, req.body);
-    if (registerCommands) {
-        res.status(200).json({responseType: 'reply', message: '*🤖 ꜱᴇ ʜᴀ ᴄʀᴇᴀᴅᴏ ᴜɴ ʀᴇɢɪꜱᴛʀᴏ!*'});
+    const {success, error, responseType, message} = registerCommands
+    if (success) {
+        res.status(200).json({responseType, message});
     } else {
         let dbData        = await smart_reply_groups.findAll({attributes: {exclude: ['createdAt', 'updatedAt']}});
         let data          = dbData.map(item => item.dataValues);

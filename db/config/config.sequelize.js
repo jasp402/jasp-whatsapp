@@ -7,6 +7,7 @@ module.exports = {
         "database": "db.settings",
         "host"    : "127.0.0.1",
         "dialect" : "sqlite",
-        "storage" : path.resolve(root.path, 'db', 'db.settings.sqlite')
+        "storage" : path.resolve(root.path, 'db', 'db.settings.sqlite'),
+        "logging" : false
     }
 };
