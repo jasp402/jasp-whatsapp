@@ -100,11 +100,12 @@ WAPI.waitNewMessages(false, async (data) => {
                 if (bot.responseType === 'reply') {
                     WAPI.ReplyMessageWithQuote(message.id, bot.message, message.id);
                 }
+                //ToDo: responseType Buttons should user sendMessageButton() Function
             });
         }
 
         if (message.isGroupMsg && message.type === 'sticker') {
-            processWebhooks(`${webhooks}/chat/groups/sticker`, body).then(bot=>{
+            processWebhooks(`${webhooks}/chat/groups/sticker`, body).then(bot => {
                 if (bot.responseType === 'send') {
                     WAPI.sendMessage2(body.user, bot.message);
                 }
@@ -114,135 +115,24 @@ WAPI.waitNewMessages(false, async (data) => {
             });
         }
 
-        /*
-                if(message.isGroupMsg && (message.type === 'image' || message.type === 'video')){
-                    processWebhooks(`${webhooks}/chat/groups/media`, body);
-                }
+        if (message.isGroupMsg && (message.type === 'image' || message.type === 'video')) {
+            //ToDo: this not working
+            //processWebhooks(`${webhooks}/chat/groups/media`, body);
+        }
+
+        //** CONTACTS  **/
+        if (!message.isGroupMsg && message.type === 'chat') {
+            processWebhooks(`${webhooks}/chat/contacts`, body);
+        }
+        if (!message.isGroupMsg && message.type === 'sticker') {
+            processWebhooks(`${webhooks}/chat/contacts/sticker`, body);
+        }
+
+        if (!message.isGroupMsg && (message.type === 'image' || message.type === 'video')) {
+            processWebhooks(`${webhooks}/chat/contacts/media`, body);
+        }
 
 
-                if(!message.isGroupMsg && message.type === 'chat' ) {
-                    processWebhooks(`${webhooks}/chat/contacts`, body);
-                }
-
-                if(!message.isGroupMsg && message.type === 'sticker'){
-                    processWebhooks(`${webhooks}/chat/contacts/sticker`, body);
-                }
-
-                if(!message.isGroupMsg && (message.type === 'image' || message.type === 'video')) {
-                    processWebhooks(`${webhooks}/chat/contacts/media`, body);
-                }
-
-
-                //Reacciona ante stickers en grupos
-                if(message.isGroupMsg === true && message.type === 'sticker'){
-                    if(groupAllowReply.includes(groupId)) {
-                        let bot = groupReply[groupId].find(bot => bot.requestType === message.type);
-                        WAPI.sendSeen(body.user);
-                        WAPI.sendMessage2(body.user, bot.response);
-                        return;
-                    }
-                }
-
-                //Reacciona ante mis mensajes en grupos
-                if(message.isGroupMsg === true && message.type === 'chat'){
-                    if (body.user in groupReply) {
-                        fetch(`${webhooks}/chat-groups`, {
-                            method : "POST",
-                            body   : JSON.stringify(body),
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                            .then((resp) => resp.json())
-                            .then(function (response) {
-                                console.log(response);
-                            });
-                    }
-                }
-
-                //Reacciona ante mensajes normales
-                if (message.isGroupMsg === false && message.type === "chat") {
-                    fetch(`${webhooks}/bot`, {
-                        method : "POST",
-                        body   : JSON.stringify(body),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                        .then((resp) => resp.json())
-                        .then(function (response) {
-                            //response received from server
-                            WAPI.sendSeen(message.from._serialized);
-
-                            //replying to the user based on response
-                            if (response && response.length > 0) {
-                                response.forEach(async itemResponse => {
-                                    const {files, text, spintax} = itemResponse;
-
-                                    // sending files if there is any
-                                    if (files !== undefined) {
-                                        window.getFile(files).then((base64Data) => {
-                                            WAPI.sendImage(base64Data, message.chatId._serialized, files, text);
-                                        }).catch((error) => {
-                                            window.log("Error in sending file\n" + error);
-                                        })
-                                    }
-                                    else{
-                                        if(spintax){
-                                            let response = resolveSpintax(`{${itemResponse.text}}`);
-                                            response.then(text => {
-                                                // text = text.fillVariables({
-                                                // 	name       : message.sender.pushname,
-                                                // 	phoneNumber: message.sender.id.user,
-                                                // 	greetings  : greetings()
-                                                // });
-                                                WAPI.sendMessage2(message.from._serialized, text);
-                                            });
-                                        }
-                                        else{
-                                            WAPI.sendMessage2(message.from._serialized, text);
-                                        }
-
-                                    }
-                                });
-                            }
-                        })
-                        .catch(function (error) {
-                            window.log(error);
-                        });
-
-                }
-
-                //Reaciona ante imagenes y videos (chat y estados)
-                if(message.type === 'image' || message.type === 'video'){
-                    window.log(`chatId:${message.chatId}`);
-                    if (message.isGroupMsg === false) {
-                        let source = (message.chatId === 'status@broadcast') ? 'estado' : 'chat';
-                        fetch(`${webhooks}/save-image/${source}`, {
-                            method : "POST",
-                            body   : JSON.stringify(body),
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                            .then((resp) => resp.json())
-                            .then(function (response) {
-                                //response received from server
-                                window.log(response);
-                            })
-                            .catch(function (error) {
-                                console.log(error);
-                            });
-                    }
-
-                }
-
-                //Reacciona ante numeros en Lista Nega
-                if (settings.blocked.indexOf(message.chatId.user) >= 0) {
-                    console.log("number is blocked by BOT. no reply");
-                    return;
-                }
-                */
     }
 });
 

@@ -874,6 +874,27 @@ window.WAPI.sendMessage2 = function (id, message, done) {
 	return false;
 };
 
+window.WAPI.sendMessageButton = function (id, message, done) {
+	var chat = WAPI.getChat(id);
+	if (chat !== undefined) {
+		try {
+			if (done !== undefined) {
+				let params = { title: null, message: null, footer: null, buttons: done };
+				chat.sendMessage(message, params);
+				return true;
+			} else {
+				chat.sendMessage(message);
+			}
+			return true;
+		} catch (error) {
+			if (done !== undefined) done(false)
+			return false;
+		}
+	}
+	if (done !== undefined) done(false)
+	return false;
+};
+
 window.WAPI.sendSeen = function (id, done) {
 	var chat = window.WAPI.getChat(id);
 	if (chat !== undefined) {
@@ -1002,7 +1023,6 @@ window.WAPI.getCommonGroups = async function (id, done) {
 	}
 	return output;
 };
-
 
 window.WAPI.getProfilePicSmallFromId = function (id, done) {
 	window.Store.ProfilePicThumb.find(id).then(function (d) {
