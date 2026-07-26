@@ -109,3 +109,4 @@ dist
 /bin/
 /db/db.settings.sqlite
 /package-lock.json
+/src/config/groups.local.js
