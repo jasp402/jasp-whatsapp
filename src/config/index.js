@@ -1,3 +1,16 @@
+let groupConfig = {
+    groupAllowReply: [],
+    groupReply: {}
+};
+
+try {
+    groupConfig = require('./groups.local');
+} catch (error) {
+    if (error.code !== 'MODULE_NOT_FOUND') {
+        throw error;
+    }
+}
+
 module.exports = Object.freeze({
     appConfig      : {
         headless    : false,
@@ -114,78 +127,6 @@ module.exports = Object.freeze({
             script  : 'getBiblicalPicture'
         },
     ],
-    groupAllowReply: [
-        '1617735527@g.us',
-        '1620836330@g.us',
-        '120363043370524728@g.us'
-    ],
-    groupReply     : {
-        '1617735527@g.us': [
-            {
-                'requestType': 'sticker',
-                'contains'   : [],
-                'exact'      : [],
-                'response'   : '👆🏻 \n' +
-                    '\n' +
-                    '★━━━━━━━━━━━━━━━━━★\n' +
-                    ' ░▒▓ JS & NᴏᴅᴇJS ▓▒░\n' +
-                    '★━━━━━━━━━━━━━━━━━★\n' +
-                    'Por favor, lee las reglas 👇🏻\n' +
-                    '\n' +
-                    '⚠️ PROHIBIDO ⚠️\n' +
-                    '\n' +
-                    '🚫 Subir ACORTADORES.\n' +
-                    '\n' +
-                    '🚫 Hacer SPAM.\n' +
-                    '\n' +
-                    '🚫 Stickers (Sin excepciones)\n' +
-                    '\n' +
-                    '🚫 Publicidad de ventas.\n' +
-                    '\n' +
-                    '🚫 Pornográfia.\n' +
-                    '\n' +
-                    '🚫 Insultar a otro miembro (Prohibido el bulling).\n' +
-                    '\n' +
-                    '🚫 Prohibido cualquier material audiovisual que no este relacionado con los intereses del grupo.'
-            },
-            {
-                'requestType': 'chat',
-                'contains'   : [],
-                'exact'      : [],
-                'response'   : '👆🏻 \n'
-            }
-        ],
-        '1620836330@g.us': [
-            {
-                'requestType': 'sticker',
-                'contains'   : [],
-                'exact'      : [],
-                'response'   : '🚫 Subir URL con ACORTADORES.\n' +
-                    '🚫 Realizar SPAM o publicar Venta de cualquier tipo sin autorización de los Administradores.\n' +
-                    '🚫 Prohibido el uso Stickers (Sin excepciones)\n' +
-                    '🚫 Pornográfia.\n' +
-                    '🚫 Insultar a otro miembro (y uso de malas palabras).\n' +
-                    '🚫 Prohibido cualquier material audiovisual que no este relacionado con los intereses del grupo.'
-            },
-        ],
-        '120363043370524728@g.us':[
-            {
-                'requestType': 'sticker',
-                'contains'   : [],
-                'exact'      : [],
-                'response'   : '🚫 Subir URL con ACORTADORES.\n' +
-                    '🚫 Realizar SPAM o publicar Venta de cualquier tipo sin autorización de los Administradores.\n' +
-                    '🚫 Prohibido el uso Stickers (Sin excepciones)\n' +
-                    '🚫 Pornográfia.\n' +
-                    '🚫 Insultar a otro miembro (y uso de malas palabras).\n' +
-                    '🚫 Prohibido cualquier material audiovisual que no este relacionado con los intereses del grupo.'
-            },
-            {
-                'requestType': 'chat',
-                'contains'   : [],
-                'exact'      : [],
-                'response'   : '👆🏻 \n'
-            }
-        ]
-    }
+    groupAllowReply: groupConfig.groupAllowReply,
+    groupReply     : groupConfig.groupReply
 });
