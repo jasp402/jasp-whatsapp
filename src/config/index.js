@@ -83,33 +83,33 @@ module.exports = Object.freeze({
     scheduler      : [
         {
             timer   : '7:35',
-            sender  : ['573008626251', '51915199237', '573172749748'],
+            sender  : ['****', '****', '****'],
             response: `🌄 Muy Buenos días!`,
         },
         {
             timer   : '12:30',
-            sender  : ['51915199237', '573008626251', '51959029726', '573172749748'],
+            sender  : ['****', '****', '****', '****'],
             response: `🍜 {Buen {provecho| apetito} 😋}`,
         },
         {
             timer   : '15:00',
-            sender  : ['51959029726', '56948828296'],
+            sender  : ['****', '****'],
             response: `👋 Epale negrita! ¿Como estas? 😋`,
         },
         {
             timer   : '21:00',
-            sender  : ['51915199237'],
+            sender  : ['****'],
             response: `🥱😴 Es hora de dormir; descanza!`,
         },
         {
             timer   : '9:30',
-            sender  : ['584243560060', '51915199237', '51959029726', '56948828296', '573008626251', '573172749748', '584167162016', '56930750213'],
+            sender  : ['****', '****', '****', '****', '****', '****', '****', '****'],
             response: ``,
             script  : 'getBiblicalPicture'
         },
         {
             timer   : '9:10',
-            sender  : ['51926466715', '584167162016', '584243061610', '56930750213'],
+            sender  : ['****', '****', '****', '****'],
             response: ``,
             script  : 'getBiblicalPicture'
         },
